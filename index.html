@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信群传送门 | SeeDAO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer=""></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f0ff',
+                            100: '#e0e0ff',
+                            200: '#c7c6ff',
+                            300: '#a7a6ff',
+                            400: '#8786ff',
+                            500: '#5D5CDE',
+                            600: '#4845c7',
+                            700: '#3d39aa',
+                            800: '#332f8a',
+                            900: '#2e2b70',
+                        },
+                        contributor: '#7c3aed',
+                        local: '#059669',
+                        project: '#2563eb',
+                    },
+                    animation: {
+                        'bounce-slow': 'bounce 2s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'slide-down': 'slideDown 0.5s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .group-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1);
+        }
+
+        .group-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            z-index: 10;
+        }
+
+        .card-enter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .card-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.3s ease-out;
+        }
+
+        .group-card .join-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .group-card:hover .join-icon {
+            transform: scale(1.2) rotate(15deg);
+        }
+
+        .tab-indicator {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Fancy separator */
+        .fancy-separator {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--separator-color, #5D5CDE), transparent);
+            width: 100%;
+            opacity: 0.7;
+        }
+
+        /* Dark mode adjustments */
+        .dark .dark-invert {
+            filter: invert(1);
+        }
+
+        /* Animation for the message bubble */
+        .message-bubble {
+            animation: float 5s ease-in-out infinite;
+            transform-origin: center bottom;
+        }
+
+        /* Permission tag animation */
+        .permission-tag {
+            transition: all 0.2s ease;
+        }
+
+        .group-card:hover .permission-tag {
+            transform: scale(1.1);
+        }
+
+        /* Search field animation */
+        .search-field {
+            transition: all 0.3s ease;
+        }
+
+        .search-field:focus {
+            transform: scale(1.02);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(93, 92, 222, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(93, 92, 222, 0.7);
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(93, 92, 222, 0.7);
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(93, 92, 222, 0.9);
+        }
+
+        /* Empty state animation */
+        .empty-state-animation {
+            transform-origin: center;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300" x-data="groupsApp()"
+    x-init="init()">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="relative bg-white dark:bg-gray-800 shadow-md transition-all duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center float">
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                <span class="text-primary-500">SeeDAO</span> 微信群传送门
+                            </h1>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 animate-pulse-slow">
+                                <!-- 共有 <span class="font-medium text-primary-500" x-text="totalGroups"></span> 个群组 -->
+                                如果您有 SeeDAO 微信群想要登记上来，请填写此【<a
+                                    href="https://docs.google.com/forms/d/e/1FAIpQLSf6OBe9aKbE9O9obC171HJoJybRauKAZj2j7HI-BZG2D0xnkA/viewform"
+                                    target="_blank">Google 表单</a>］协助登录，或是在【<a
+                                    href="https://github.com/SeeDAO-OpenSource/wechat-portal" target="_blank">GitHub
+                                    项目库</a>】上提交 PR
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button @click="toggleColorMode()"
+                            class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <svg x-show="!isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                </path>
+                            </svg>
+                            <svg x-show="isDarkMode" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-300"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decorative elements -->
+            <div class="absolute right-10 top-2 w-32 h-32 opacity-10 dark:opacity-5 message-bubble">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                    class="text-primary-500">
+                    <path fill-rule="evenodd"
+                        d="M5.337 21.718a6.707 6.707 0 01-.533-.074.75.75 0 01-.44-1.223 3.73 3.73 0 00.814-1.686c.023-.115-.022-.317-.254-.543C3.274 16.587 2.25 14.41 2.25 12c0-5.03 4.428-9 9.75-9s9.75 3.97 9.75 9c0 5.03-4.428 9-9.75 9-.833 0-1.643-.097-2.417-.279a6.721 6.721 0 01-4.246.93z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="absolute left-10 top-4 w-20 h-20 opacity-10 dark:opacity-5 message-bubble"
+                style="animation-delay: 1s">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                    class="text-primary-500 transform rotate-180">
+                    <path fill-rule="evenodd"
+                        d="M5.337 21.718a6.707 6.707 0 01-.533-.074.75.75 0 01-.44-1.223 3.73 3.73 0 00.814-1.686c.023-.115-.022-.317-.254-.543C3.274 16.587 2.25 14.41 2.25 12c0-5.03 4.428-9 9.75-9s9.75 3.97 9.75 9c0 5.03-4.428 9-9.75 9-.833 0-1.643-.097-2.417-.279a6.721 6.721 0 01-4.246.93z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Search and filter -->
+            <div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4" data-aos="fade-down">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <input type="text" x-model="searchQuery" @input="filterGroups()" placeholder="搜索群组名称 ..."
+                            class="search-field block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-base text-gray-900 dark:text-white transition-colors duration-200">
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">排序：</span>
+                        <select x-model="sortBy" @change="sortGroups()"
+                            class="block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-sm text-gray-900 dark:text-white">
+                            <option value="name">名称</option>
+                            <option value="permission">权限</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="relative mb-8" data-aos="fade-up" data-aos-delay="100">
+                <nav class="flex space-x-4 overflow-x-auto pb-2 scrollbar-none" aria-label="Tabs">
+                    <button @click="activeTab = 'all'; filterGroups()"
+                        :class="{'text-primary-600 dark:text-primary-400 border-primary-500': activeTab === 'all', 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300': activeTab !== 'all'}"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap">
+                        全部群组
+                    </button>
+                    <button @click="activeTab = 'contributor'; filterGroups()"
+                        :class="{'text-contributor border-contributor': activeTab === 'contributor', 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300': activeTab !== 'contributor'}"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap">
+                        治理通知
+                    </button>
+                    <button @click="activeTab = 'local'; filterGroups()"
+                        :class="{'text-local border-local': activeTab === 'local', 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300': activeTab !== 'local'}"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap">
+                        地方据点
+                    </button>
+                    <button @click="activeTab = 'project'; filterGroups()"
+                        :class="{'text-project border-project': activeTab === 'project', 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300': activeTab !== 'project'}"
+                        class="px-4 py-2 text-sm font-medium border-b-2 transition-all duration-200 whitespace-nowrap">
+                        社区项目
+                    </button>
+                </nav>
+                <div class="mt-2 fancy-separator" style="--separator-color: #5D5CDE;"></div>
+            </div>
+
+            <!-- Status bar -->
+            <div class="my-4 flex justify-between items-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="text-sm text-gray-600 dark:text-gray-300">
+                    显示 <span class="font-semibold text-primary-500" x-text="filteredGroups.length"></span> 个群组
+                </div>
+                <div x-show="activeTab !== 'all'" class="flex items-center">
+                    <template x-if="activeTab === 'contributor'">
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-contributor bg-opacity-10 text-contributor">
+                            治理通知
+                        </span>
+                    </template>
+                    <template x-if="activeTab === 'local'">
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-local bg-opacity-10 text-local">
+                            地方据点群
+                        </span>
+                    </template>
+                    <template x-if="activeTab === 'project'">
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-project bg-opacity-10 text-project">
+                            项目入口群
+                        </span>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Group Cards -->
+            <div x-show="filteredGroups.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="(group, index) in filteredGroups" :key="group.id">
+                    <div :data-aos="'fade-up'" :data-aos-delay="100 + (index % 9) * 50"
+                        class="group-card rounded-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800 transition-all duration-300 hover:shadow-xl"
+                        :class="{
+                            'border-l-4 border-contributor': group.type === 'contributor',
+                            'border-l-4 border-local': group.type === 'local',
+                            'border-l-4 border-project': group.type === 'project'
+                        }">
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white line-clamp-2"
+                                    x-text="group.name"></h3>
+                                <div class="permission-tag px-2 py-1 rounded-md text-xs font-semibold" :class="{
+                                        'bg-red-100 text-red-800 dark:bg-red-900 dark:bg-opacity-30 dark:text-red-300': group.permission === '需审核',
+                                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:bg-opacity-30 dark:text-yellow-300': group.permission === '邀请制',
+                                        'bg-green-100 text-green-800 dark:bg-green-900 dark:bg-opacity-30 dark:text-green-300': group.permission === '开放加入'
+                                    }" x-text="group.permission"></div>
+                            </div>
+
+                            <div class="mt-2 h-12">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                                        :class="{
+                                            'bg-contributor bg-opacity-10': group.type === 'contributor',
+                                            'bg-local bg-opacity-10': group.type === 'local',
+                                            'bg-project bg-opacity-10': group.type === 'project'
+                                        }">
+                                        <template x-if="group.type === 'contributor'">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-contributor"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                                                </path>
+                                            </svg>
+                                        </template>
+                                        <template x-if="group.type === 'local'">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-local"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                                </path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                        </template>
+                                        <template x-if="group.type === 'project'">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-project"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                                </path>
+                                            </svg>
+                                        </template>
+                                    </div>
+                                    <span class="text-sm" :class="{
+                                            'text-contributor': group.type === 'contributor',
+                                            'text-local': group.type === 'local',
+                                            'text-project': group.type === 'project'
+                                        }" x-text="group.info"></span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-600 dark:text-gray-300">
+                                        <p x-text="group.contactMethod">
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"
+                                        x-text="group.condtion ? '※ ' + group.condtion : ''">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty state -->
+            <div x-show="filteredGroups.length === 0" class="mt-8 p-8 text-center" data-aos="fade-up">
+                <div class="mx-auto w-32 h-32 empty-state-animation">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="text-gray-300 dark:text-gray-600 w-full h-full">
+                        <path fill-rule="evenodd"
+                            d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">找不到群组</h3>
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">請嘗試更改搜索条件或切換不同的分類標簽</p>
+                <button @click="resetFilters()"
+                    class="mt-4 px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors">
+                    重置筛选条件
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white dark:bg-gray-800 py-6 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="fancy-separator mb-6"></div>
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        © 2025 <a href="https://www.seedao.xyz" target="_blank">SeeDAO</a>. All Rights Reserved.
+                    </div>
+                    <div class="flex space-x-4">
+
+                        <button
+                            class="text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                            <a href="https://discord.com/invite/seedao-xyz" target="_blank"><img
+                                    src="data:image/png;base64,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"
+                                    width="24" height="24" style="filter: invert(0.7);" /></a>
+                        </button>
+
+                        <button
+                            class="text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                            <a href="https://twitter.com/see_dao" target="_blank"><img
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGwAAABtCAMAAABz5HRaAAAAh1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD3YishAAAALXRSTlMAFB0nCjpXYH2GmY9zaU0xE0M5MCYcTFZfEEC/7/+fIJB/34CwUHCv0KB8z2oNcL7xAAAEv0lEQVR4Ab2aB4OiPBCGR2UJSGBDsYt4uOXa//97XwFfd7lNhmDiPVe2WB5n8hJaaDqz2Wy+mM0Ceiizp1BE8fJGItPseU7+WWQyWWpJZLbwahLJkiUWz55M4YgJPuWuksO3TEWWF0VZFUWeCRkNHpTP3lSJyFdfEhhUefopMvGTD5Vcr8jIKpcfuvvCouStpnUw+uT8Vt89Y5cnKKoiK0qJz5ZPL8teBZTAiyYVVyaMiqGKpwdlw/eDo7jqMrIjuLZwExAP28s0sHp23JdV0n2guFhZuyJFd6NsbSpGC13Y2NjgWpMj63EbXAU5k4/aArg8UPRDbx6O1J8LtpQMZN3DOXki57bu0iEbTEoqczg25JFtNzvohk108QnIGwicNIxnosgrKkEKNE3MyTM5Gvm1iYK8IzVBUHwTXRtZfS1sTQ8g+5KRRZdEegjxoDR09okeQvVHaeruwnblfl8SjxyWJu4sbH841v9xPO3pSlMaShNWhe3IRHOob5yaTn4+6p4efd7WCq6wwzdTWV1VoN3vz21dn41bdjY0aynreqt/AK6BUtuHIPmIiOImj0td17ramlbnaoga0/HP/KPKivS81HpbonEdytdvhzd9+tHHiMt9H4L3hobsdE081oZBI/SR7SJkdStowGut5ztzHBngaKAkAz+G4QZnvevHzhAz5F3AquXtz20JQ6nh+EYGgv8d4XXIJJlo6k+c9qzsQgZ6yU8igpQdNNCe9zt0d4IMg7bAkBnY1wD8ej9f3ifKin5LK/svZi41g61s3ickY/NBe7TMAkHEJiTrwpiQkbY9vb5byvYj+2tBEmHk82HDjvg4yu7/1GnEwJEYfndzYl+fkZ297IUYRCcbu2jxbi17Gz3LHpU1R1tZQwwZLwOvlq5f5EFGwk4mvMiobF27CFmCeZhDjOtO45dhEib6oBTicnIrDNHnN2ocb7gW1k9U100b3DuLtCiMna4wEXPs2rujCPpo9EeNilia1qmJ2MXkVOIQlbe5NRHHA6p3jtm4PeixsbtqMO+7KWiURrz/OjI7TZ7f12RI67POV63sKCxPrCUmEmVzmqnvYUnjKEyKlc2g7d4OfDZ4CqQQp2o6mv/Zi/Ov2sB5Z32dJ/n4LrhnBj4gGjZbWYoa0cdJulaQJThpZ/oIxLsuFzZVAYkDYXw/57exdlDTSdiNleakHae8LM3+7XI+nS4XUdqKgBicuyRMRDxdBYwJZHxpjmSIR0/wyNJUjPskf6G0DPEYlqbIP7ggzF9cdYK/IBzgurFvCtya4H/pLx3LJ+2Ukj6kiZK/k+H3rpYyPJDMPScR6dA2Mla+ByxlHou8hSSIuE+/WnoMCe6grvjxFN6CyCduDZsv13r8Pr10HTesvNiM3xN1z6Tq10htiQe2OTmwiu1cGLdl5jJvoIfWNqHIaQnVmqzIHZaHYQlVUkyYZzp+qnsXocWryat++F4yL0uD6at+pulUmPBLqNhPCd3CsoHMejL74pZxOCeWeZbcnlu5rKCCbxGQlmAR4mnooIsORCJfzOgTs+dcREuAtYkuOowFiCPZEcXLIfKJ3FEiXo6ShBV5ogojzhTD5AtVhlJXURQWAT2EVZVnQvakIsxLRVP4F8556xeRWZvvAAAAAElFTkSuQmCC"
+                                    width="24" height="24" style="filter: invert(0.7);" /></a>
+                        </button>
+
+                        <button
+                            class="text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                            <a href="https://seedao.mirror.xyz/" target="_blank"><img
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGwAAABtCAMAAABz5HRaAAAAh1BMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD3YishAAAALHRSTlMAmYYTYI8KcyDfQ005Jn0QaUBMVzC/JzrvVp8dgHAUXxyQf8+vUGqgfNCwMUpkCs0AAASfSURBVHhe5ZrZkuI2FIZlrV7wugADuIGmJz1J/P7Pl5TKjQZsnSMZdW7yX3R1FUV9/GeztRB/yTct8r1622W8oNFdVFXZ30cSXtu0EtGihEqDAretiEBRvg1DYpkhgTz2uin1aKHgbbbRyrJKPRqutsFQokpzOavM/CGXdBcCpZqcWHXJijvu17pikfzuqUHTwfi9JdbkLhVfpnLipI1aG0umDMpZ+f1LXua2AkBBODqZ69xZ2ZSrlHhrM+EyR5SspraRZIUY9/k2K2BbuDmhaZQ5sKhmFYysFqOG5sI6S/KC5A9Dw1kNeVGNoWEsIF3haLLQrA0JoI2mFfZ0cMMKReNwLzckkBqou7eGFZKW24ujIgF11kUibQmjMiRM2n6/zqdgJKiYnlzdchBTEliptiCXgsjdAGX8r0o3mn6e/ngy5hjEkl9v+1Fr3x947BjI49xYg5GGfnzSzfCg5lUzYxRGxdf9uKRD7FCR+bOxHejqfT/aJMD85dqaj7E6GQElP9Eayd2NiRHRO2atdTVW9iOqDyCU9Pde28DGyj9HB91KqLPNvCg0GWOtp0lhSoTBw+NjdNSB2KTff5hxmdtY7ygEr5LcPEUVVB7x6KHaRtNxxKOY+MCSEoqjJIR05pGDBBHXyQLTjJ2hLipeNJZ8HA4fi5b3FmtS9/VU+L88jB2mzHSfztYMREOdM5bU4MDcl2DSjsD44HNWjET5J/DGeiQd0GV/zWDxU05nz51+GTZZyoD62KMpOeFxNBWS6ceLWGbVeB+Ve8fGprqZlW7uRQ0O0+/6DBvs5aj03wpIGZJ97jiO/9AzkdqHVT8PER7qm301RqE2S+a1iA/qxN5oggBrqHENbATWfv9P2D44TPyHBYKUvj+sB0ofaurPNbCrfZ2mptZe1LAGxoFxBQ3ibg2sW2RNpZFCjxh/WAK8hKTgw/PqDzsAGzodYcAuQe0Pq4G1xZEQAbyj9r6whNifMAJ5++a+MA4s0dTXIGFO73LJgpyMsa+hmJukIVnDxaG9x9ws1aDV2csrNHVvZgUtPMvEnZXEBOiyarbk9Q8kXvZm0Y7GkQyurBO8E8J++/9opZ1eZTETRbPkBWnrWYQ/LDeFKZG1kRyQkwkzNjLEGumQmkxqbBNwZ0oTs0biT4h1LdEjF0Zwa0Zdb0P1Nb67yR83fPBd27oHUHApRmyGrwiieHji9SdLAMENYSmmUYmprIdD3yfJ7eMw1CVBtVk62UrDn1eY6tgBG/ABxbUHywZ8+g0HFhGzfCBY+KOYxjqbKQudMAV8VgQrEllAvz7XEeZBiyO6wPnkIVkNdkrJQ7IAnYEbD753cvC+PaPXGDxuXpzxE9jXO+BCUZZZar84S1JhWJga4EqTx0WZxnmirb8e1gkgMkDMo4qRlVeo6MXz1o9/LOWU70hJzyR742QmkCtUuLnI7aLktoqQ+2T4fS0tmiL23sw9QJojABwXFa3Nn9y2d1IkmvWTjmncl1SbbuUD57hrlYgQlL87I6pUxTlXBdUYI5WiKFwXTiNUos1JIOUwj2Ik//TxYglU8A0j36JLl7ZcqYJSqhRvU0/OP2I7WH3ynNvLAAAAAElFTkSuQmCC"
+                                    width="24" height="24" style="filter: invert(0.7);" /></a>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initial groups data - this is where you would add/edit groups
+        function groupsApp() {
+            return {
+                allGroups: [
+                    { id: 1001, name: 'SeeDAO 市政厅校友群', type: 'contributor', permission: '需审核', info: '由担任过市政厅岗位，了解市政厅运行运作的 SeeDAO 贡献者组成', condtion: '需曾任市政厅岗位', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 1002, name: '共建者港口', type: 'contributor', permission: '需审核', info: '持有 SNS 的社区成员, 主要交流 P1 提案发起与组队', condtion: '需具备 SNS', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 1003, name: 'SeeDAO SEED 通知群', type: 'contributor', permission: '需审核', info: '此为在 SeeDAO 持有 SEED 的社区成员 , 接收相关通知的通知群 ', condtion: '需具备 SEED', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 1004, name: '闪电网络共学学员群', type: 'contributor', permission: '需审核', info: '针对闪电网络共学组织的交流群', condtion: '需报名共学', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+
+                    { id: 2001, name: 'SeeDAO 深圳据点', type: 'local', permission: '开放加入', info: '深圳地方 SeeDAO 小伙伴交流群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 2002, name: 'SeeDAO 大理 : SeeShore', type: 'local', permission: '开放加入', info: '大理 SeeDAO 小伙伴交流群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 2003, name: 'SeeDAO Australia', type: 'local', permission: '开放加入', info: 'SeeDAO 纽澳小伙伴地方交流群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 2004, name: 'SeeDAO 日本', type: 'local', permission: '开放加入', info: 'SeeDAO 在日本的小伙伴交流群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 2005, name: 'SeeDAO 北美据点', type: 'local', permission: '开放加入', info: 'SeeDAO 在北美的小伙伴们的交流讨论群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 2006, name: 'SeeDAO 台湾据点', type: 'local', permission: '开放加入', info: '台湾的 SeeDAO 小伙伴的日常交流群 (也有另外 LINE 社群)', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 2007, name: 'SeeDAO 南京', type: 'local', permission: '需审核', info: '南京和周边城市成员联络群~', condtion: '', contactMethod: '邮件联系 : forever121812 [at] foxmail [dot] com' },
+
+                    { id: 3001, name: 'SeeDAO 治理公会', type: 'project', permission: '开放加入', info: '前身为 SeeDAO 运营公会, 后改为治理公会, 自由交流讨论社区治理事项', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3002, name: 'SeeDAO 宣传公会', type: 'project', permission: '开放加入', info: '交流讨论 SeeDAO 各种宣发交流活动', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3003, name: '研发公会据点', type: 'project', permission: '开放加入', info: '欢迎对研发技术感兴趣的 SeeDAO 小伙伴加入', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3004, name: '宏观经济共学小组', type: 'project', permission: '开放加入', info: '专注宏观经济共学活动 , 日常交流讨论全球宏观经济发展趋势 ', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3005, name: 'SeeDAO 新手营', type: 'project', permission: '开放加入', info: '欢迎新人加入', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3006, name: 'SeeDAO 投研公会', type: 'project', permission: '开放加入', info: '对 Web3/Crypto 最新前沿投研趋势的交流讨论', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3007, name: 'SeeDAO 艺术兔洞会', type: 'project', permission: '开放加入', info: '前身为 SeeDAO 艺术公会 , 现为 SeeDAO关心艺术的小伙伴交流群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3008, name: 'SeeDesign (Web3 设计师联盟)', type: 'project', permission: '开放加入', info: 'SeeDAO 中设计师们的交流讨论群', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                    { id: 3009, name: 'SeeDAO 二次元基地', type: 'project', permission: '开放加入', info: '前身 Discord ACGN 地下基地频道, 现日常交流各种 ACGN 主题', condtion: '', contactMethod: '微信联系 Ricky : fatfingererr2022' },
+                ],
+                filteredGroups: [],
+                searchQuery: '',
+                activeTab: 'all',
+                sortBy: 'name',
+                isDarkMode: false,
+                typeLabels: {
+                    'contributor': '治理通知',
+                    'local': '地方据点',
+                    'project': '社区项目'
+                },
+
+                get totalGroups() {
+                    return this.allGroups.length;
+                },
+
+                init() {
+                    // Initialize dark mode based on user preference
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        document.documentElement.classList.add('dark');
+                        this.isDarkMode = true;
+                    }
+
+                    // Add event listener for dark mode changes
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+                        if (event.matches) {
+                            document.documentElement.classList.add('dark');
+                            this.isDarkMode = true;
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                            this.isDarkMode = false;
+                        }
+                    });
+
+                    // Initialize AOS animation library
+                    AOS.init({
+                        duration: 800,
+                        easing: 'ease-in-out',
+                        once: true
+                    });
+
+                    // Initialize filtered groups
+                    this.filterGroups();
+
+                    // Add more sample groups for demonstration
+                    // this.generateMoreGroups();
+                },
+
+                toggleColorMode() {
+                    this.isDarkMode = !this.isDarkMode;
+                    if (this.isDarkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+
+                filterGroups() {
+                    // Filter by tab first
+                    let results = [...this.allGroups];
+
+                    if (this.activeTab !== 'all') {
+                        results = results.filter(group => group.type === this.activeTab);
+                    }
+
+                    // Then filter by search query
+                    if (this.searchQuery.trim() !== '') {
+                        const query = this.searchQuery.toLowerCase().trim();
+                        results = results.filter(group =>
+                            group.name.toLowerCase().includes(query) ||
+                            group.contactMethod.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // Sort the results
+                    this.sortGroupsArray(results);
+
+                    // Update filtered groups with animation delay
+                    setTimeout(() => {
+                        this.filteredGroups = results;
+                    }, 100);
+                },
+
+                sortGroups() {
+                    this.sortGroupsArray(this.filteredGroups);
+                },
+
+                sortGroupsArray(groups) {
+                    if (this.sortBy === 'name') {
+                        groups.sort((a, b) => a.name.localeCompare(b.name));
+                    } else if (this.sortBy === 'permission') {
+                        const order = { '开放加入': 1, '邀请制': 2, '需审核': 3 };
+                        groups.sort((a, b) => order[a.permission] - order[b.permission]);
+                    }
+                },
+
+                resetFilters() {
+                    this.searchQuery = '';
+                    this.activeTab = 'all';
+                    this.sortBy = 'name';
+                    this.filterGroups();
+                },
+
+                // Generate more sample groups for a total of 100
+                generateMoreGroups() {
+                    const types = ['contributor', 'local', 'project'];
+                    const permissions = ['开放加入', '邀请制', '需审核'];
+                    const existingCount = this.allGroups.length;
+
+                    for (let i = existingCount + 1; i <= 100; i++) {
+                        const typeIndex = i % types.length;
+                        const type = types[typeIndex];
+
+                        let name = '';
+                        let contactMethod = '';
+
+                        if (type === 'contributor') {
+                            name = `贡献者群组 #${i - existingCount}`;
+                            contactMethod = `联系專員 ID: contributor${i}`;
+                        } else if (type === 'local') {
+                            name = `地區${i - existingCount}社区群`;
+                            contactMethod = `掃描二維碼或搜索群號：loc${i}`;
+                        } else {
+                            name = `專案${i - existingCount}交流群`;
+                            contactMethod = `提交申请至项目負責人`;
+                        }
+
+                        const permission = permissions[i % permissions.length];
+
+                        this.allGroups.push({
+                            id: i,
+                            name: name,
+                            type: type,
+                            permission: permission,
+                            contactMethod: contactMethod
+                        });
+                    }
+
+                    // Update filtered groups after generation
+                    this.filterGroups();
+                }
+            };
+        }
+    </script>
+
+
+</body>
+
+</html>
